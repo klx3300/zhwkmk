@@ -1,5 +1,5 @@
-#ifndef X__BADMINTON_STRPARSE_H
-#define X__BADMINTON_STRPARSE_H
+#ifndef Q_ZHWKMK_STRPARSE_H
+#define Q_ZHWKMK_STRPARSE_H
 
 #include <vector>
 #include <string>
