@@ -1,0 +1,59 @@
+
+# Lines starts with # means it's a comment line.
+# In-line comment is not supported.
+
+# all stuff arranges as function-like behavior
+# but recursive function calls are not supported
+# such as : a(b(c,d),e(f,g)) will cause regarding string
+# "b(c,d)" and "e(f,g)" as parameters to function a.
+# one line can only contains a function call
+# string literal is also supported. but cross-line literal is not supported.
+# e.g. func(param1,"param2","par,am3") is legal
+#      func(param1,"param2","par
+#                               ,am3") is illegal.
+#      using func(param1,\"param2,"par\"am3") is now legal
+
+# include: this will found the first param zhwkmk file and automatically parse it.
+#          the second parameter is reference path. terminating / cannot be omitted.
+
+include(zhwkre/make.zhwkmk,zhwkre/)
+
+# the first parameter of the following four will not be replaced by macro.
+
+# macro: the second param will replace the first param in later function call parameters.
+#        spaces is strictly parsed.
+macro(cxxflags,-g)
+# cxxflags = -g
+macro(ldflags,-static)
+
+# concat: the first parameters will become the macro of concatenation of all following 
+#         parameters
+concat(cflags,-,g)
+# cflags = -g
+
+# vari: the first parameter will become a variable that have the value of second parameter.
+#       the diffenence between macro is this will become a real variable definition in generated makefile.
+
+# eval: the first parameter will become the macro of 
+#       the execution result of the second parameter in shell envir.
+# example: eval(echocc,echo echocc)
+
+# cc and cxx function specifies the compiler using.
+# in fact, this is also implemented like macro.
+cc(gcc)
+cxx(g++)
+
+# object: compile the following stuff as object. storaged at corresponding folder.
+#         second parameter is source file, third is compiler flags,
+#         optional parameter is name: use as dependency check in executable linking.
+# notice: will recognize the correct compiler using the filename.
+#         you can use eval() for non-c/cpp compilers.
+object(cxx,parse_str/parse_str.cpp,cxxflags,parse_str)
+object(cxx,main.cpp,cxxflags)
+
+# executable: link the following stuff as an executable.
+#             parameter:compiler,name,ldflags,objects...
+executable(cxx,main,ldflags,main.cpp,parse_str)
+
+# default: set default make target to the name specified here
+default(main)
