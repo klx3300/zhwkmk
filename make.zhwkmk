@@ -1,0 +1,8 @@
+cxx(g++)
+object(cxx,parse_str/strparse.cpp,,parse_str)
+object(cxx,gendest/gendest.cpp,,gendest)
+object(cxx,macro_replace/macro_replace.cpp,,macro_replace)
+object(cxx,stroper/stroper.cpp,,stroper)
+object(cxx,main.cpp,,main)
+executable(cxx,main,,main,parse_str,gendest,macro_replace,stroper)
+default(main)

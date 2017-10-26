@@ -16,7 +16,7 @@ string str_base_trim(string src,string trimer){
     string tmpstr;
     for(auto ch:src){
         bool FLAG=true;
-        for(auto chk:src){
+        for(auto chk:trimer){
             if(ch == chk){
                 FLAG=false;
                 break;

@@ -48,6 +48,10 @@ vector<FuncParams> parsefunc(string src,int lineno){
                     tmpstr += ch;
                     FLAG = 2;
                 }
+            }else if(ch == ','){
+                // empty parameter!!
+                // but i need to successfully handle that.
+                tmpvec.push_back(FuncParams("",false));
             }else{
                 tmpstr += ch;
                 FLAG++;
@@ -119,6 +123,9 @@ vector<FuncParams> parsefunc(string src,int lineno){
         // abnormal termination
         cerr << "[FAIL] Unclosed function call at " << lineno << ":" << tmpos << endl;
         return vector<FuncParams>();
+    }
+    for(auto x:tmpvec){
+        cout << x.str << endl;
     }
     return tmpvec;
 }

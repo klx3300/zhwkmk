@@ -3,6 +3,7 @@ using namespace std;
 
 vector<FuncParams> macro_replace(unordered_map<std::string,std::string> replacement,vector<FuncParams> orig){
     vector<FuncParams> tmpret;
+    tmpret.push_back(orig[0]);
     for(int i=1;i<orig.size();i++){
         FuncParams &x = orig[i];
         if(x.is_literal == false && replacement.find(x.str) != replacement.end()){

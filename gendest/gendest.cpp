@@ -24,14 +24,14 @@ void gendest_eval(vector<string> &output,vector<FuncParams> call){
 void gendest_obj(vector<string> &output,vector<FuncParams> call,string dir){
     // parse paras
     string comp,src,flag,name;
-    comp = call[0].str;
-    src=dir+call[1].str;
-    flag=call[2].str;
-    if(call.size() == 3){
+    comp = call[1].str;
+    src=dir+call[2].str;
+    flag=call[3].str;
+    if(call.size() == 4){
         // shortv
         name = dir+src+".o";
     }else{
-        name = dir+call[3].str;
+        name = dir+call[4].str+".o";
     }
     // generate
     output.push_back(name+": "+src);
@@ -48,13 +48,13 @@ void gendest_obj(vector<string> &output,vector<FuncParams> call,string dir){
 void gendest_exe(vector<string> &output,vector<FuncParams> call,string dir){
     // parse paras
     string comp,src,flag,name;
-    comp=call[0].str;
-    src = dir+call[3].str+".o";
-    flag = call[2].str;
-    name = dir+call[1].str;
+    comp=call[1].str;
+    src = dir+call[4].str+".o";
+    flag = call[3].str;
+    name = dir+call[2].str;
     string ass;
     ass += name+": "+dir+src+" ";
-    for(int i=4;i<call.size();i++){
+    for(int i=5;i<call.size();i++){
         ass += call[i].str + ".o ";
     }
     output.push_back(ass);
@@ -65,7 +65,7 @@ void gendest_exe(vector<string> &output,vector<FuncParams> call,string dir){
     ass = "";
     ass+=tab;
     ass += "@"+comp+" "+flag+" -o "+name+" "+src+" ";
-    for(int i=4;i<call.size();i++){
+    for(int i=5;i<call.size();i++){
         ass += call[i].str+".o ";
     }
     output.push_back(ass);
@@ -85,4 +85,14 @@ void gendest_clean(vector<string> &output,vector<string> targets){
     }
     ass+=" || true";
     output.push_back(ass);
+}
+
+void gendest_default(vector<string> &output,string default_name){
+    vector<string> copy = output;
+    output.clear();
+    output.push_back("__fake_main__: "+default_name);
+    output.push_back("");
+    for(auto x: copy){
+        output.push_back(x);
+    }
 }

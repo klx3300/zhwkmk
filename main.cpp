@@ -10,7 +10,7 @@
 
 #define println(str) cout << str << endl;
 #define unixok(funcall) (!(funcall))
-#define dbg(...) printf("DBG" __VA_ARGS__);printf("\n")
+#define dbg(...) printf("[DBG] " __VA_ARGS__);printf("\n")
 
 using namespace std;
 
@@ -61,7 +61,9 @@ void parsefile(string filename,string prestructure){
     while(getline(makespec,linebuffer)){
         lineno++;
         // ignore comments
+        cout << linebuffer <<" ";
         linebuffer = str_trim(linebuffer);
+        cout << linebuffer << endl;
         if(str_startwith(linebuffer,"#")){
             continue;
         }
@@ -72,8 +74,13 @@ void parsefile(string filename,string prestructure){
         pr.push_back(parsefunc(i.second,i.first));
     }
     for(auto x:pr){
+        for(auto x:macros){
+            cout << x.first << " -> " << x.second << endl;
+        }
+        cout << "Parsing FUNC:" << x[0].str << "|";
         string origfirst = x[1].str;
         auto replaced = macro_replace(macros,x);
+        cout << replaced[0].str << "<" << endl;
         if(replaced[0].str == "include"){
             dbg("include %s",replaced[1].str.c_str());
             parsefile(replaced[1].str,replaced[2].str);// recursively
@@ -106,11 +113,14 @@ void parsefile(string filename,string prestructure){
         }else if(replaced[0].str == "object"){
             dbg("obj");
             (gendest_obj(finale,replaced,prestructure));
-            clear_targets.push_back(prestructure+(replaced.size()==3?replaced[1].str:replaced[3].str)+".o");
+            clear_targets.push_back(prestructure+(replaced.size()==4?replaced[2].str:replaced[4].str)+".o");
         }else if(replaced[0].str == "executable"){
             dbg("exe");
             (gendest_exe(finale,replaced,prestructure));
-            clear_targets.push_back(prestructure+replaced[1].str);
+            clear_targets.push_back(prestructure+replaced[2].str);
+        }else if(replaced[0].str == "default"){
+            dbg("def");
+            gendest_default(finale,replaced[1].str);
         }else{
             println("Unknown function. parsing terminated.");
             exit(-1);
