@@ -15,11 +15,13 @@
 using namespace std;
 
 unordered_map<string,string> macros;
+vector<string> clear_targets;
 vector<string> finale;
 
 void parsefile(string filename,string prestructure);
 
 int main(int argc,char** argv){
+    init_gendest();
     string filename;
     // parse args
     if(argc == 1){
@@ -36,6 +38,7 @@ int main(int argc,char** argv){
         }
     }
     parsefile(filename,"");
+    gendest_clean(finale,clear_targets);
     // write out.
     fstream output("Makefile",ios_base::out);
     for(auto x:finale){
@@ -103,9 +106,11 @@ void parsefile(string filename,string prestructure){
         }else if(replaced[0].str == "object"){
             dbg("obj");
             (gendest_obj(finale,replaced,prestructure));
+            clear_targets.push_back(prestructure+(replaced.size()==3?replaced[1].str:replaced[3].str)+".o");
         }else if(replaced[0].str == "executable"){
             dbg("exe");
             (gendest_exe(finale,replaced,prestructure));
+            clear_targets.push_back(prestructure+replaced[1].str);
         }else{
             println("Unknown function. parsing terminated.");
             exit(-1);
