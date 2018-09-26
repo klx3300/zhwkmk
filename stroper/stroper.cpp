@@ -14,15 +14,19 @@ bool str_endwith(string src,string chk){
 
 string str_base_trim(string src,string trimer){
     string tmpstr;
+    int state = 0;
     for(auto ch:src){
-        bool FLAG=true;
+        int laststate = state;
         for(auto chk:trimer){
             if(ch == chk){
-                FLAG=false;
+                state += 1;
                 break;
             }
         }
-        if(FLAG) tmpstr += ch;
+        if(laststate == state){
+            tmpstr += ch;
+            state = 0;
+        }
     }
     return tmpstr;
 }
