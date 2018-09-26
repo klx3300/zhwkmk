@@ -1,4 +1,5 @@
 #include "strparse.h"
+#include "../stroper/stroper.h"
 #include <iostream>
 
 using namespace std;
@@ -124,8 +125,8 @@ vector<FuncParams> parsefunc(string src,int lineno){
         cerr << "[FAIL] Unclosed function call at " << lineno << ":" << tmpos << endl;
         return vector<FuncParams>();
     }
-    for(auto x:tmpvec){
-        cout << x.str << endl;
+    for(auto &x: tmpvec){
+        x.str = str_trim(x.str);
     }
     return tmpvec;
 }

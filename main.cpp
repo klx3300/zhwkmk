@@ -26,7 +26,7 @@ int main(int argc,char** argv){
     // parse args
     if(argc == 1){
         filename = "make.zhwkmk";
-        println("makespec file not specified. fallback to default(make.zhwkmk).")
+        dbg("Makespec file not specified. fallback to default(make.zhwkmk).");
     }else{
         string tmpargv = argv[1];
         if(tmpargv == "--help"){
@@ -44,6 +44,7 @@ int main(int argc,char** argv){
     for(auto x:finale){
         output << x << endl;
     }
+    dbg("Makefile generated at Makefile.");
     return 0;
 }
 
@@ -61,9 +62,7 @@ void parsefile(string filename,string prestructure){
     while(getline(makespec,linebuffer)){
         lineno++;
         // ignore comments
-        cout << linebuffer <<" ";
         linebuffer = str_trim(linebuffer);
-        cout << linebuffer << endl;
         if(str_startwith(linebuffer,"#")){
             continue;
         }
@@ -74,52 +73,37 @@ void parsefile(string filename,string prestructure){
         pr.push_back(parsefunc(i.second,i.first));
     }
     for(auto x:pr){
-        for(auto x:macros){
-            cout << x.first << " -> " << x.second << endl;
-        }
-        cout << "Parsing FUNC:" << x[0].str << "|";
         string origfirst = x[1].str;
         auto replaced = macro_replace(macros,x);
-        cout << replaced[0].str << "<" << endl;
         if(replaced[0].str == "include"){
-            dbg("include %s",replaced[1].str.c_str());
             parsefile(replaced[1].str,replaced[2].str);// recursively
         }else if(replaced[0].str == "macro"){
-            dbg("macro");
             macros[origfirst] = replaced[2].str;
         }else if(replaced[0].str == "concat"){
-            dbg("concat");
             string tmpres;
             for(int i=2;i<replaced.size();i++){
                 tmpres+=replaced[i].str;
             }
             macros[origfirst] = tmpres;
         }else if(replaced[0].str == "vari"){
-            dbg("vari");
             macros[origfirst] = gendest_ref(origfirst);
             replaced[1].str = origfirst;
             (gendest_assign(finale,replaced));
         }else if(replaced[0].str == "eval"){
-            dbg("eval");
             replaced[1].str = origfirst;
             macros[origfirst] = gendest_ref(origfirst);
             (gendest_eval(finale,replaced));
         }else if(replaced[0].str == "cc"){
-            dbg("cc");
             macros["cc"] = str_trim(replaced[1].str);
         }else if(replaced[0].str == "cxx"){
-            dbg("cxx");
             macros["cxx"] = str_trim(replaced[1].str);
         }else if(replaced[0].str == "object"){
-            dbg("obj");
             (gendest_obj(finale,replaced,prestructure));
             clear_targets.push_back(prestructure+(replaced.size()==4?replaced[2].str:replaced[4].str)+".o");
         }else if(replaced[0].str == "executable"){
-            dbg("exe");
             (gendest_exe(finale,replaced,prestructure));
             clear_targets.push_back(prestructure+replaced[2].str);
         }else if(replaced[0].str == "default"){
-            dbg("def");
             gendest_default(finale,replaced[1].str);
         }else{
             println("Unknown function. parsing terminated.");

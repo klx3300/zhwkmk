@@ -20,4 +20,4 @@ main: main.o parse_str.o gendest.o macro_replace.o stroper.o
 	@g++  -o main main.o parse_str.o gendest.o macro_replace.o stroper.o 
 clean:
 	@echo "  CLEAN   all files."
-	-@rm parse_str.o gendest.o macro_replace.o stroper.o main.o main  || true
+	-@rm parse_str.o gendest.o macro_replace.o stroper.o main.o main  2>/dev/null >/dev/null || true

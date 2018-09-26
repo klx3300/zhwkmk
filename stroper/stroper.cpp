@@ -1,5 +1,5 @@
 #include "stroper.h"
-
+#include <cstdlib>
 #include <vector>
 
 using namespace std;
@@ -14,18 +14,35 @@ bool str_endwith(string src,string chk){
 
 string str_base_trim(string src,string trimer){
     string tmpstr;
+    string bufferstr;
     int state = 0;
     for(auto ch:src){
-        int laststate = state;
         for(auto chk:trimer){
             if(ch == chk){
-                state += 1;
+                if(state == 0) state = 1;
+                else state = 3;
                 break;
             }
         }
-        if(laststate == state){
-            tmpstr += ch;
-            state = 0;
+        switch(state){
+            case 0:
+                tmpstr += ch;
+                state = 2;
+                break;
+            case 1:
+                state = 0;
+                break;
+            case 2:
+                tmpstr += bufferstr;
+                tmpstr += ch;
+                bufferstr = "";
+                break;
+            case 3:
+                bufferstr += ch;
+                state = 2;
+                break;
+            default:
+                abort();
         }
     }
     return tmpstr;

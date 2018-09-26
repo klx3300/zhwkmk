@@ -83,7 +83,7 @@ void gendest_clean(vector<string> &output,vector<string> targets){
     for(auto x:targets){
         ass+=x+" ";
     }
-    ass+=" || true";
+    ass+=" 2>/dev/null >/dev/null || true";
     output.push_back(ass);
 }
 
