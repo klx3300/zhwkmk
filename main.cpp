@@ -73,6 +73,7 @@ void parsefile(string filename,string prestructure){
         pr.push_back(parsefunc(i.second,i.first));
     }
     for(auto x:pr){
+        if(x.size() < 1) continue; // ignore empty lines
         string origfirst = x[1].str;
         auto replaced = macro_replace(macros,x);
         if(replaced[0].str == "include"){
