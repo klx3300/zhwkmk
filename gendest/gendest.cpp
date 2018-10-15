@@ -27,15 +27,14 @@ void gendest_obj(vector<string> &output,vector<FuncParams> call){
     comp = call[1].str;
     src=call[2].str;
     flag=call[3].str;
-    if(call.size() == 4){
-        // shortv
-        name = src+".o";
-    }else{
-        name = call[4].str+".o";
-    }
+    name = call[4].str+".o";
     // generate
-    output.push_back(name+": "+src);
-    string ass;
+    string ass = name + ": " + src;
+    for(int i=5;i<call.size();i++){
+        ass += " " + call[i].str;
+    }
+    output.push_back(ass);
+    ass = "";
     ass += tab;
     ass += "@echo \"   "+comp+"   "+name+"\"";
     output.push_back(ass);

@@ -118,10 +118,28 @@ void parsefile(string filename, string prestructure, string rpath){
         }else if(replaced[0].str == "cxx"){
             macros["cxx"] = str_trim(replaced[1].str);
         }else if(replaced[0].str == "object"){
+            if(replaced.size() > 4) replaced[4].str = prestructure + replaced[4].str;
+            else replaced.push_back(FuncParams(prestructure + replaced[2].str, true));
             replaced[2].str = rpath + prestructure + replaced[2].str;
-            replaced[4].str = prestructure + replaced[4].str;
+            for(int i = 5; i < replaced.size(); i++){
+                // optional header dependencies
+                replaced[i].str = rpath + prestructure + replaced[i].str;
+            }
+            // auto detect header dependency (simple)
+            string srcname = replaced[2].str;
+            int position = srcname.find_last_of('.');
+            if(position != string::npos){
+                srcname = srcname.substr(0, position);
+            }
+            if(unixok(access((srcname + ".h").c_str(), R_OK))){
+                dbg("Auto generated header dependency %s.h", srcname.c_str());
+                replaced.push_back(FuncParams(srcname + ".h", true));
+            }else if(unixok(access((srcname + ".hpp").c_str(), R_OK))){
+                dbg("Auto generated header dependency %s.h", srcname.c_str());
+                replaced.push_back(FuncParams(srcname + ".hpp", true));
+            }
             gendest_obj(finale,replaced);
-            clear_targets.push_back(prestructure+(replaced.size()==4?replaced[2].str:replaced[4].str)+".o");
+            clear_targets.push_back(replaced[4].str + ".o");
         }else if(replaced[0].str == "executable"){
             replaced[2].str = prestructure + replaced[2].str;
             replaced[4].str = prestructure + replaced[4].str;
@@ -129,7 +147,7 @@ void parsefile(string filename, string prestructure, string rpath){
                 replaced[i].str = prestructure + replaced[i].str;
             }
             gendest_exe(finale,replaced);
-            clear_targets.push_back(prestructure+replaced[2].str);
+            clear_targets.push_back(replaced[2].str);
         }else if(replaced[0].str == "default"){
             gendest_default(finale,prestructure + replaced[1].str);
         }else{
