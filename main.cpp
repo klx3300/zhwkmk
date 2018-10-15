@@ -5,7 +5,9 @@
 #include "stroper/stroper.h"
 #include "gendest/gendest.h"
 #include <string>
-#include "unistd.h"
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <cstdio>
 
 #define println(str) cout << str << endl;
@@ -18,26 +20,34 @@ unordered_map<string,string> macros;
 vector<string> clear_targets;
 vector<string> finale;
 
-void parsefile(string filename,string prestructure);
+void parsefile(string filename,string prestructure, string rpath);
 
 int main(int argc,char** argv){
     init_gendest();
     string filename;
+    string rpath;
     // parse args
     if(argc == 1){
         filename = "make.zhwkmk";
+        rpath = "./";
         dbg("Makespec file not specified. fallback to default(make.zhwkmk).");
-    }else{
-        string tmpargv = argv[1];
-        if(tmpargv == "--help"){
-            println("read the readme?");
-            return 0;
-        }else{
-            filename = tmpargv;
-            cout << "Set makespec file to "<<filename<<endl;
-        }
+        dbg("Out-of-tree make disabled by default(./).");
     }
-    parsefile(filename,"");
+    if(argc > 1){
+        if(string(argv[1]) == "--help" || string(argv[1]) == "-h"){
+            cout << "Read readme plz!" << endl;
+            return 0;
+        }
+        rpath = string(argv[1]);
+        if(rpath[rpath.length() - 1] != '/') rpath += "/";
+        dbg("Out-of-tree zhwkmk file path set to %s", rpath.c_str());
+        filename = "make.zhwkmk";
+    }
+    if (argc > 2){
+        filename = argv[2];
+        dbg("Set makespec file to %s", filename.c_str());
+    }
+    parsefile(rpath + filename,"", rpath);
     gendest_clean(finale,clear_targets);
     // write out.
     fstream output("Makefile",ios_base::out);
@@ -48,11 +58,19 @@ int main(int argc,char** argv){
     return 0;
 }
 
-void parsefile(string filename,string prestructure){
+void parsefile(string filename, string prestructure, string rpath){
     // check access
     if(!unixok(access(filename.c_str(),R_OK))){
         cout << "Makespec file is not exist or read permission denied." << endl;
         exit(1);
+    }
+    // create directory structure
+    if(prestructure != "" && !unixok(access(prestructure.c_str(), F_OK))){
+        dbg("Creating directory structure at %s", prestructure.c_str());
+        if(!unixok(mkdir(prestructure.c_str(), 0755))){
+            cout << "Failed creating directory structure. Aborting.." << endl;
+            abort();
+        }
     }
     // read lines
     fstream makespec(filename,ios_base::in);
@@ -62,6 +80,7 @@ void parsefile(string filename,string prestructure){
     while(getline(makespec,linebuffer)){
         lineno++;
         // ignore comments
+        dbg("[%d] %s", lineno, linebuffer.c_str());
         linebuffer = str_trim(linebuffer);
         if(str_startwith(linebuffer,"#")){
             continue;
@@ -77,7 +96,7 @@ void parsefile(string filename,string prestructure){
         string origfirst = x[1].str;
         auto replaced = macro_replace(macros,x);
         if(replaced[0].str == "include"){
-            parsefile(replaced[1].str,replaced[2].str);// recursively
+            parsefile(rpath + replaced[1].str, prestructure + replaced[2].str, rpath);// recursively
         }else if(replaced[0].str == "macro"){
             macros[origfirst] = replaced[2].str;
         }else if(replaced[0].str == "concat"){
@@ -99,13 +118,20 @@ void parsefile(string filename,string prestructure){
         }else if(replaced[0].str == "cxx"){
             macros["cxx"] = str_trim(replaced[1].str);
         }else if(replaced[0].str == "object"){
-            (gendest_obj(finale,replaced,prestructure));
+            replaced[2].str = rpath + prestructure + replaced[2].str;
+            replaced[4].str = prestructure + replaced[4].str;
+            gendest_obj(finale,replaced);
             clear_targets.push_back(prestructure+(replaced.size()==4?replaced[2].str:replaced[4].str)+".o");
         }else if(replaced[0].str == "executable"){
-            (gendest_exe(finale,replaced,prestructure));
+            replaced[2].str = prestructure + replaced[2].str;
+            replaced[4].str = prestructure + replaced[4].str;
+            for(int i = 5; i < replaced.size(); i++){
+                replaced[i].str = prestructure + replaced[i].str;
+            }
+            gendest_exe(finale,replaced);
             clear_targets.push_back(prestructure+replaced[2].str);
         }else if(replaced[0].str == "default"){
-            gendest_default(finale,replaced[1].str);
+            gendest_default(finale,prestructure + replaced[1].str);
         }else{
             println("Unknown function. parsing terminated.");
             exit(-1);

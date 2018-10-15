@@ -21,17 +21,17 @@ void gendest_eval(vector<string> &output,vector<FuncParams> call){
     output.push_back(call[1].str+=" := `"+call[2].str+"`");
 }
 
-void gendest_obj(vector<string> &output,vector<FuncParams> call,string dir){
+void gendest_obj(vector<string> &output,vector<FuncParams> call){
     // parse paras
     string comp,src,flag,name;
     comp = call[1].str;
-    src=dir+call[2].str;
+    src=call[2].str;
     flag=call[3].str;
     if(call.size() == 4){
         // shortv
-        name = dir+src+".o";
+        name = src+".o";
     }else{
-        name = dir+call[4].str+".o";
+        name = call[4].str+".o";
     }
     // generate
     output.push_back(name+": "+src);
@@ -45,15 +45,15 @@ void gendest_obj(vector<string> &output,vector<FuncParams> call,string dir){
     output.push_back(ass);
 }
 
-void gendest_exe(vector<string> &output,vector<FuncParams> call,string dir){
+void gendest_exe(vector<string> &output,vector<FuncParams> call){
     // parse paras
     string comp,src,flag,name;
     comp=call[1].str;
-    src = dir+call[4].str+".o";
+    src = call[4].str+".o";
     flag = call[3].str;
-    name = dir+call[2].str;
+    name = call[2].str;
     string ass;
-    ass += name+": "+dir+src+" ";
+    ass += name+": "+src+" ";
     for(int i=5;i<call.size();i++){
         ass += call[i].str + ".o ";
     }

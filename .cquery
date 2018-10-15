@@ -1,0 +1,6 @@
+%c -std=gnu17
+%cpp -std=gnu++14
+
+-pthread
+
+-I.
