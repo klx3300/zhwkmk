@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <cstdio>
+#include <unordered_set>
 
 #define println(str) cout << str << endl;
 #define unixok(funcall) (!(funcall))
@@ -19,6 +20,7 @@ using namespace std;
 unordered_map<string,string> macros;
 vector<string> clear_targets;
 vector<string> finale;
+unordered_set<string> arbits;
 
 void parsefile(string filename,string prestructure, string rpath);
 
@@ -140,13 +142,18 @@ void parsefile(string filename, string prestructure, string rpath){
             }
             gendest_obj(finale,replaced);
             clear_targets.push_back(replaced[4].str + ".o");
+        } else if(replaced[0].str == "arbit"){
+            replaced[1].str = rpath + prestructure + replaced[1].str;
+            macros[replaced[2].str] = replaced[1].str;
+            arbits.insert(replaced[1].str);
+            dbg("Arbitrary Object at %s", replaced[1].str.c_str());
         }else if(replaced[0].str == "executable"){
             replaced[2].str = prestructure + replaced[2].str;
             replaced[4].str = prestructure + replaced[4].str;
             for(int i = 5; i < replaced.size(); i++){
                 replaced[i].str = prestructure + replaced[i].str;
             }
-            gendest_exe(finale,replaced);
+            gendest_exe(finale,replaced,arbits);
             clear_targets.push_back(replaced[2].str);
         }else if(replaced[0].str == "default"){
             gendest_default(finale,prestructure + replaced[1].str);

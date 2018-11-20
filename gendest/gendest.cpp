@@ -1,6 +1,7 @@
 #include "gendest.h"
 #include "../stroper/stroper.h"
 #include <cstdio>
+#include <unordered_set>
 using namespace std;
 
 char tab[5];
@@ -44,7 +45,7 @@ void gendest_obj(vector<string> &output,vector<FuncParams> call){
     output.push_back(ass);
 }
 
-void gendest_exe(vector<string> &output,vector<FuncParams> call){
+void gendest_exe(vector<string> &output,vector<FuncParams> call, unordered_set<string> &arbits){
     // parse paras
     string comp,src,flag,name;
     comp=call[1].str;
@@ -54,7 +55,12 @@ void gendest_exe(vector<string> &output,vector<FuncParams> call){
     string ass;
     ass += name+": "+src+" ";
     for(int i=5;i<call.size();i++){
-        ass += call[i].str + ".o ";
+        if(arbits.find(call[i].str) != arbits.end()){
+            // arbitrary object
+            ass += call[i].str + " ";
+        } else {
+            ass += call[i].str + ".o ";
+        }
     }
     output.push_back(ass);
     ass = "";
@@ -65,7 +71,12 @@ void gendest_exe(vector<string> &output,vector<FuncParams> call){
     ass+=tab;
     ass += "@"+comp+" "+flag+" -o "+name+" "+src+" ";
     for(int i=5;i<call.size();i++){
-        ass += call[i].str+".o ";
+        if(arbits.find(call[i].str) != arbits.end()){
+            // arbitrary object
+            ass += call[i].str + " ";
+        } else {
+            ass += call[i].str + ".o ";
+        }
     }
     output.push_back(ass);
 }
